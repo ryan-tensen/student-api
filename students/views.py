@@ -1,8 +1,9 @@
 from django.shortcuts import render
 
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
-from .models import Student
+from .models import Student,Teacher
 
 
 def fetch_student_data(request):
@@ -11,3 +12,48 @@ def fetch_student_data(request):
     for student in students:
         student_list.append({"name":student.name, "score":student.score,"teacher":student.teacher.name})
     return JsonResponse(student_list,safe=False)
+
+# Add to students/views.py and students/urls.py:
+#
+# 1. GET /student/by_teacher/<int:teacher_id>/
+#    → Return all students for that teacher
+#
+# 2. POST /student/create/
+#    → Accept name, score, teacher_id
+#    → Create new student in database
+#    → Return 201 on success
+
+import json
+
+def get_student_by_teacher(request,teacher_id):
+    if request.method == "GET":
+        student_data = Student.objects.filter(teacher__id = teacher_id)
+        student_list = []
+        for student in student_data:
+            student_list.append({"name":student.name, "score":student.score,"teacher":student.teacher.name})
+        if not student_data:
+           return JsonResponse({"message":"Data not Found"},status=404)
+        return JsonResponse(student_list,safe=False)
+    else:
+        return JsonResponse({"message":"Method not allowed"},status=405)
+
+@csrf_exempt
+def create_student(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            name = data.get("name")
+            score = data.get("score")
+            teacher_id = data.get("teacher_id")
+            if not name or not score or not teacher_id:
+                return JsonResponse({"message":"Missing data"}, status=400)
+            try:
+                Student.objects.create(name=name, score=int(score), teacher_id = teacher_id)
+                return JsonResponse({"message":"Student created successfully"},status=201)
+            except ValueError:
+                return JsonResponse({"message":"Enter valid data"},status=400)
+        except json.decoder.JSONDecodeError:
+            return JsonResponse({"message":"Something went wrong"}, status=500)
+    else:
+        return JsonResponse({"message":"Method not allowed"},status=405)
+
