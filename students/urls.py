@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import fetch_student_data, get_student_by_teacher, create_student, update_student, delete_student, get_stats\
-
+from .views import fetch_student_data, get_student_by_teacher, create_student, update_student, delete_student, \
+    get_stats, search_student
 urlpatterns = [
             path("fetch_student_data/",fetch_student_data),
             path("get_student_by_teacher/<int:teacher_id>/",get_student_by_teacher),
@@ -9,4 +9,5 @@ urlpatterns = [
             path("update_student/<int:student_id>/",update_student),
             path("delete_student/<int:student_id>/",delete_student),
             path("get_stats/",get_stats),
+            path("search_student/",search_student)
 ]

@@ -113,3 +113,30 @@ def get_stats(request):
         return JsonResponse(resp,safe=False)
     else:
         return JsonResponse({"message":"Method not allowed"},status=405)
+
+
+
+# Add one more endpoint:
+#
+# GET /student/search/?name=Kumaresan
+# → Search student by name using query parameter
+# → Return student details if found
+# → Return 404 if not found
+
+def search_student(request):
+    if request.method == "GET":
+        try:
+            name = request.GET.get("name")
+            if not name:
+                return JsonResponse({"message":"Name is required"},status=400)
+            student_data = Student.objects.filter(name=name)
+            if not student_data:
+                return JsonResponse({"message":"Data not Found"},status=404)
+            student_list = []
+            for student in student_data:
+                student_list.append({"name":student.name,"score":student.score,"teacher":student.teacher.name})
+            return JsonResponse(student_list,safe=False)
+        except ValueError:
+            return JsonResponse({"message":"Enter valid data"},status=400)
+    else:
+        return JsonResponse({"message":"Method not allowed"},status=405)
