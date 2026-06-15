@@ -84,3 +84,32 @@ def delete_student(request,student_id):
             return JsonResponse({"message":"Student not found"},status=404)
     else:
         return JsonResponse({"message":"Method not allowed"},status=405)
+
+
+# Add one more endpoint:
+#
+# GET /student/stats/
+# → Return:
+#    - total number of students
+#    - highest score
+#    - lowest score
+#    - average score
+
+
+def get_stats(request):
+    if request.method == "GET":
+        student_data = Student.objects.all()
+        if not student_data:
+            return JsonResponse({"message":"Data not Found"},status=404)
+        student_score = []
+        for student in student_data:
+            student_score.append(student.score)
+        resp = {
+            "Total_students":len(student_data),
+            "Highest Score":max(student_score),
+            "Lowest Score":min(student_score),
+            "Average Score":sum(student_score)/len(student_score),
+        }
+        return JsonResponse(resp,safe=False)
+    else:
+        return JsonResponse({"message":"Method not allowed"},status=405)
