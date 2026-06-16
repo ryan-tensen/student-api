@@ -2,16 +2,28 @@ from django.shortcuts import render
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Student,Teacher
+from .serializers import StudentSerializer
 
 
+# def fetch_student_data(request):
+#     student_list =[]
+#     students = Student.objects.all()
+#     for student in students:
+#         student_list.append({"name":student.name, "score":student.score,"teacher":student.teacher.name})
+#     return JsonResponse(student_list,safe=False)
+
+
+@api_view(["GET"])
 def fetch_student_data(request):
-    student_list =[]
     students = Student.objects.all()
-    for student in students:
-        student_list.append({"name":student.name, "score":student.score,"teacher":student.teacher.name})
-    return JsonResponse(student_list,safe=False)
+    serializer = StudentSerializer(students,many=True)
+    return Response(serializer.data)
+
+
 
 # Add to students/views.py and students/urls.py:
 #
@@ -37,54 +49,87 @@ def get_student_by_teacher(request,teacher_id):
     else:
         return JsonResponse({"message":"Method not allowed"},status=405)
 
-@csrf_exempt
+# @csrf_exempt
+# def create_student(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body)
+#             name = data.get("name")
+#             score = data.get("score")
+#             teacher_id = data.get("teacher_id")
+#             if not name or not score or not teacher_id:
+#                 return JsonResponse({"message":"Missing data"}, status=400)
+#             try:
+#                 Student.objects.create(name=name, score=int(score), teacher_id = teacher_id)
+#                 return JsonResponse({"message":"Student created successfully"},status=201)
+#             except ValueError:
+#                 return JsonResponse({"message":"Enter valid data"},status=400)
+#         except json.decoder.JSONDecodeError:
+#             return JsonResponse({"message":"Something went wrong"}, status=500)
+#     else:
+#         return JsonResponse({"message":"Method not allowed"},status=405)
+
+@api_view(["POST"])
 def create_student(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            name = data.get("name")
-            score = data.get("score")
-            teacher_id = data.get("teacher_id")
-            if not name or not score or not teacher_id:
-                return JsonResponse({"message":"Missing data"}, status=400)
-            try:
-                Student.objects.create(name=name, score=int(score), teacher_id = teacher_id)
-                return JsonResponse({"message":"Student created successfully"},status=201)
-            except ValueError:
-                return JsonResponse({"message":"Enter valid data"},status=400)
-        except json.decoder.JSONDecodeError:
-            return JsonResponse({"message":"Something went wrong"}, status=500)
+    serializer = StudentSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message":"Student created successfully"}, status=201)
     else:
-        return JsonResponse({"message":"Method not allowed"},status=405)
+        return Response(serializer.errors, status=400)
 
 
-@csrf_exempt
+# @csrf_exempt
+# def update_student(request,student_id):
+#     if request.method == "PUT":
+#         try:
+#             data = json.loads(request.body)
+#             new_score = data.get("score")
+#             student = Student.objects.get(id=student_id)
+#             student.score = new_score
+#             student.save()
+#             return JsonResponse({"message":"Student updated successfully"},status=200)
+#         except Student.DoesNotExist:
+#             return JsonResponse({"message":"Student not Found"},status=404)
+#     else:
+#         return JsonResponse({"message":"Method not allowed"},status=405)
+
+
+@api_view(["PUT"])
 def update_student(request,student_id):
-    if request.method == "PUT":
-        try:
-            data = json.loads(request.body)
-            new_score = data.get("score")
-            student = Student.objects.get(id=student_id)
-            student.score = new_score
-            student.save()
-            return JsonResponse({"message":"Student updated successfully"},status=200)
-        except Student.DoesNotExist:
-            return JsonResponse({"message":"Student not Found"},status=404)
+    try:
+        serializer = StudentSerializer(data=request.data,instance=Student.objects.get(id=student_id),partial=True)
+    except Student.DoesNotExist:
+        return Response({"message":"Student not found"},status=404)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message":"Student updated successfully"}, status=200)
     else:
-        return JsonResponse({"message":"Method not allowed"},status=405)
+        return Response(serializer.errors, status=400)
 
-@csrf_exempt
+
+
+# @csrf_exempt
+# def delete_student(request,student_id):
+#     if request.method == "DELETE":
+#         try:
+#             student = Student.objects.get(id=student_id)
+#             student.delete()
+#             return JsonResponse({"message":"Student deleted successfully"},status=200)
+#         except Student.DoesNotExist:
+#             return JsonResponse({"message":"Student not found"},status=404)
+#     else:
+#         return JsonResponse({"message":"Method not allowed"},status=405)
+
+
+@api_view(["DELETE"])
 def delete_student(request,student_id):
-    if request.method == "DELETE":
-        try:
-            student = Student.objects.get(id=student_id)
-            student.delete()
-            return JsonResponse({"message":"Student deleted successfully"},status=200)
-        except Student.DoesNotExist:
-            return JsonResponse({"message":"Student not found"},status=404)
-    else:
-        return JsonResponse({"message":"Method not allowed"},status=405)
-
+    try:
+        student = Student.objects.get(id=student_id)
+        student.delete()
+        return Response({"message":"Student deleted successfully"}, status=200)
+    except Student.DoesNotExist:
+        return Response({"message":"Student not found"},status=404)
 
 # Add one more endpoint:
 #
