@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Student,Teacher
-from .serializers import StudentSerializer
+from .serializers import StudentSerializer, TeacherSerializer
 
 
 # def fetch_student_data(request):
@@ -185,3 +185,30 @@ def search_student(request):
             return JsonResponse({"message":"Enter valid data"},status=400)
     else:
         return JsonResponse({"message":"Method not allowed"},status=405)
+
+
+# Create a TeacherSerializer and add two endpoints:
+#
+# 1. GET /teacher/all/ → fetch all teachers
+# 2. POST /teacher/create/ → create new teacher
+#    → Accept name, email
+#    → Validate with serializer
+
+@api_view(["GET"])
+def all_teachers(request):
+    try:
+        teacher = Teacher.objects.all()
+        teacher_data = TeacherSerializer(teacher,many=True)
+        return Response(teacher_data.data)
+    except Teacher.DoesNotExist:
+        return JsonResponse({"message":"Teacher not found"},status=404)
+
+
+@api_view(["POST"])
+def create_teacher(request):
+    serializer = TeacherSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message":"Teacher created successfully"}, status=201)
+    else:
+        return Response(serializer.errors, status=400)
