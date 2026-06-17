@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import fetch_student_data, get_student_by_teacher, create_student, update_student, delete_student, \
-    get_stats, search_student, all_teachers, create_teacher, StudentViewSet
+    get_stats, search_student, all_teachers, create_teacher, StudentViewSet, TeacherViewSet
 
 urlpatterns = [
             path("fetch_student_data/",fetch_student_data),
@@ -17,4 +17,7 @@ urlpatterns = [
 
 default_router = DefaultRouter()
 default_router.register('students', StudentViewSet)
+urlpatterns += default_router.urls
+default_router = DefaultRouter()
+default_router.register('teachers', TeacherViewSet)
 urlpatterns += default_router.urls

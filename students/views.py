@@ -224,3 +224,23 @@ class StudentViewSet(viewsets.ModelViewSet):
         kwargs["partial"] = True
         return self.update(request,*args,**kwargs)
 
+
+# Create a TeacherViewSet:
+# 1. Add ViewSet for Teacher model
+# 2. Register with router
+# 3. Test all 5 endpoints in Postman:
+#    - GET all teachers
+#    - GET single teacher
+#    - POST create teacher
+#    - PATCH update teacher
+#    - DELETE teacher
+
+
+class TeacherViewSet(viewsets.ModelViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+
+    def partial_update(self,request,*args,**kwargs):
+        kwargs["partial"] = True
+        return self.update(request,*args,**kwargs)
+
