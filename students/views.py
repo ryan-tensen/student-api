@@ -212,3 +212,15 @@ def create_teacher(request):
         return Response({"message":"Teacher created successfully"}, status=201)
     else:
         return Response(serializer.errors, status=400)
+
+
+from rest_framework import viewsets
+
+class StudentViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+    def partial_update(self,request,*args,**kwargs):
+        kwargs["partial"] = True
+        return self.update(request,*args,**kwargs)
+
