@@ -214,11 +214,17 @@ def create_teacher(request):
         return Response(serializer.errors, status=400)
 
 
-from rest_framework import viewsets
+from rest_framework import viewsets,filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+
+    filter_backends = (DjangoFilterBackend,filters.OrderingFilter,filters.SearchFilter)
+    filterset_fields = ['name','score','teacher']
+    search_fields = ['name']
+    ordering_fields = ['score','name']
 
     def partial_update(self,request,*args,**kwargs):
         kwargs["partial"] = True
