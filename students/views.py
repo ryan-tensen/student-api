@@ -242,9 +242,19 @@ class StudentViewSet(viewsets.ModelViewSet):
 #    - DELETE teacher
 
 
+# Add filtering to TeacherViewSet:(18-06-2026)
+# 1. Filter by name
+# 2. Search by name
+# 3. Order by name
+
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
+
+    filter_backends = (DjangoFilterBackend,filters.OrderingFilter,filters.SearchFilter)
+    filterset_fields = ['name','email','id']
+    ordering_fields = ['name','id']
+    search_fields = ['name']
 
     def partial_update(self,request,*args,**kwargs):
         kwargs["partial"] = True
