@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Student,Teacher
@@ -220,6 +221,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated]
 
     filter_backends = (DjangoFilterBackend,filters.OrderingFilter,filters.SearchFilter)
     filterset_fields = ['name','score','teacher']
@@ -250,6 +252,7 @@ class StudentViewSet(viewsets.ModelViewSet):
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
+    permission_classes = [IsAuthenticated]
 
     filter_backends = (DjangoFilterBackend,filters.OrderingFilter,filters.SearchFilter)
     filterset_fields = ['name','email','id']
