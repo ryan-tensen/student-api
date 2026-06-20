@@ -1,8 +1,11 @@
+from pickle import FALSE
+
+from django.core.serializers import serialize
 from django.shortcuts import render
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -231,6 +234,30 @@ class StudentViewSet(viewsets.ModelViewSet):
     def partial_update(self,request,*args,**kwargs):
         kwargs["partial"] = True
         return self.update(request,*args,**kwargs)
+
+    @action(detail=False,methods=['get'])
+    def top_scores(self,request):
+        students = Student.objects.filter(score__gte=90)
+        serializer = StudentSerializer(students,many=True)
+        return Response(serializer.data)
+
+    @action(detail=True,methods=['get'])
+    def report(self,request,pk=None):
+        try:
+            student = Student.objects.get(id=pk)
+            serializer = StudentSerializer(student,many=False)
+            data = serializer.data
+            if data.get('score')>=90:
+                data["grade"] = "A"
+            elif data.get('score')>=80:
+                data["grade"] = "B"
+            elif data.get('score')>=70:
+                data["grade"] = "C"
+            else:
+                data["grade"] = "F"
+            return Response(data)
+        except Student.DoesNotExist:
+            return Response({"message":"Student not found"},status=404)
 
 
 # Create a TeacherViewSet:
