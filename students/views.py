@@ -259,6 +259,41 @@ class StudentViewSet(viewsets.ModelViewSet):
         except Student.DoesNotExist:
             return Response({"message":"Student not found"},status=404)
 
+    # Add one more custom action:
+    #
+    # @action(detail=False, methods=['get'])
+    # def stats(self, request):
+    #     → Total students count
+    #     → Average score
+    #     → Highest score
+    #     → Lowest score
+    #
+    # Return all four in one response.
+
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        try:
+            student = Student.objects.all()
+            serializer = StudentSerializer(student, many=True)
+            if len(student)==0:
+                return Response({"message":"Student not found"},status=404)
+            data = serializer.data
+            score = []
+            for i in data:
+                score.append(i["score"])
+
+            resp = {
+                "Total_students":len(student),
+                "Highest Score":max(score),
+                "Lowest Score":min(score),
+                "Average Score":sum(score)/len(score),
+            }
+            return Response(resp)
+        except ValueError:
+            return Response({"message": "Data not Found"}, status=404)
+
+
+
 
 # Create a TeacherViewSet:
 # 1. Add ViewSet for Teacher model
