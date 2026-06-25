@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Course, Enrollment
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from .serializers import CourseSerializer,EnrollmentSerializer
 
 
@@ -14,6 +14,11 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
+
+    filter_backends = [DjangoFilterBackend,filters.SearchFilter,filters.OrderingFilter]
+    filterset_fields = ['id','title','duration','teacher']
+    search_fields = ['title','teacher__name']
+    ordering_fields = ['id','duration']
 
     @action(detail=True, methods=['get'])
     def students(self, request, pk=None):
