@@ -293,7 +293,17 @@ class StudentViewSet(viewsets.ModelViewSet):
             return Response({"message": "Data not Found"}, status=404)
 
 
+    # GET /student/students/failing/
+    # → Return all students with score below 50
+    # → Use custom action
+    # → Test in Postman
+    # → Push to GitHub
 
+    @action(detail=False, methods=['get'])
+    def failing(self, request):
+        students = Student.objects.filter(score__lt=50)
+        serializer = StudentSerializer(students, many=True)
+        return Response(serializer.data)
 
 # Create a TeacherViewSet:
 # 1. Add ViewSet for Teacher model
