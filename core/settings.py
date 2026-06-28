@@ -85,13 +85,28 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'student_api',
+#         'USER': 'root',
+#         'PASSWORD': 'Kumaran@09',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
+
+
+import os
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'student_api',
-        'USER': 'root',
-        'PASSWORD': 'Kumaran@09',
-        'HOST': 'localhost',
+        'NAME': os.environ.get('DB_NAME', 'student_api'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': '3306',
     }
 }
